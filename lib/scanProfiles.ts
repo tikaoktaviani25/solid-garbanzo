@@ -1,0 +1,55 @@
+import { ScanProfile } from "@/types";
+
+export const scanProfiles: ScanProfile[] = [
+  {
+    name: "Quick Scan",
+    description: "Fast scan for common vulnerabilities",
+    checks: ["SQL Injection", "XSS", "Security Headers"],
+    depth: 1,
+    timeout: 30,
+  },
+  {
+    name: "Standard Scan",
+    description: "Comprehensive scan with balanced speed and coverage",
+    checks: [
+      "SQL Injection",
+      "XSS",
+      "CSRF",
+      "Security Headers",
+      "SSL/TLS",
+      "Information Disclosure",
+      "Directory Traversal",
+    ],
+    depth: 3,
+    timeout: 60,
+  },
+  {
+    name: "Deep Scan",
+    description: "Thorough scan covering all vulnerability types",
+    checks: [
+      "SQL Injection",
+      "XSS",
+      "CSRF",
+      "Security Headers",
+      "SSL/TLS",
+      "Information Disclosure",
+      "Directory Traversal",
+      "Authentication",
+      "Authorization",
+      "File Upload",
+      "Command Injection",
+      "XXE",
+      "SSRF",
+      "Broken Access Control",
+    ],
+    depth: 5,
+    timeout: 120,
+  },
+  {
+    name: "Custom Scan",
+    description: "Configure your own scan parameters",
+    checks: [],
+    depth: 3,
+    timeout: 60,
+  },
+];

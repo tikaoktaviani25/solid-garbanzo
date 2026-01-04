@@ -1,0 +1,12 @@
+
+> vuln-scanner@1.0.0 dev
+> next dev
+
+▲ Next.js 16.1.1 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.12.67:3000
+
+✓ Starting...
+✓ Ready in 1041ms
+○ Compiling / ...
+ GET / 200 in 3.6s (compile: 3.4s, render: 175ms)
