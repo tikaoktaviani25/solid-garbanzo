@@ -1,372 +1,303 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { ScanResult, ScanProfile, ScanStatistics } from "@/types";
-import { generateVulnerabilities } from "@/lib/mockScanner";
-import ScannerForm from "@/components/ScannerForm";
-import ScanProgress from "@/components/ScanProgress";
-import ScanResults from "@/components/ScanResults";
-import Dashboard from "@/components/Dashboard";
+import { useState, useEffect } from 'react';
+import { Product, ProductMatch, SearchResult, TabType } from '@/types';
+import { analyzeImage } from '@/lib/imageAnalysis';
+import { saveSearchHistory, saveSearchResult, getAppStatistics } from '@/lib/storage';
+import CameraCapture from '@/components/CameraCapture';
+import ProductCard from '@/components/ProductCard';
+import ProductDetails from '@/components/ProductDetails';
+import Wishlist from '@/components/Wishlist';
+import SearchHistory from '@/components/SearchHistory';
 
 export default function Home() {
-  const [scans, setScans] = useState<ScanResult[]>([]);
-  const [activeTab, setActiveTab] = useState<"scanner" | "results" | "dashboard">("scanner");
-  const [statistics, setStatistics] = useState<ScanStatistics>({
-    totalScans: 0,
-    completedScans: 0,
-    totalVulnerabilities: 0,
-    criticalCount: 0,
-    highCount: 0,
-    mediumCount: 0,
-    lowCount: 0,
-    infoCount: 0,
+  const [activeTab, setActiveTab] = useState<TabType>('search');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [currentSearch, setCurrentSearch] = useState<SearchResult | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [stats, setStats] = useState({
+    totalSearches: 0,
+    totalProductsFound: 0,
+    totalWishlistItems: 0,
+    totalSavings: 0
   });
 
-  // Load scans from localStorage on mount
   useEffect(() => {
-    const savedScans = localStorage.getItem("vulnscanner_scans");
-    if (savedScans) {
-      const parsed = JSON.parse(savedScans);
-      const scansWithDates = parsed.map((scan: ScanResult) => ({
-        ...scan,
-        startTime: new Date(scan.startTime),
-        endTime: scan.endTime ? new Date(scan.endTime) : undefined,
-      }));
-      setScans(scansWithDates);
-    }
-  }, []);
+    updateStats();
+  }, [activeTab]);
 
-  // Save scans to localStorage whenever they change
-  useEffect(() => {
-    if (scans.length > 0) {
-      localStorage.setItem("vulnscanner_scans", JSON.stringify(scans));
-    }
-    updateStatistics();
-  }, [scans]);
+  const updateStats = () => {
+    const appStats = getAppStatistics();
+    setStats(appStats);
+  };
 
-  const updateStatistics = () => {
-    const stats: ScanStatistics = {
-      totalScans: scans.length,
-      completedScans: scans.filter((s) => s.status === "completed").length,
-      totalVulnerabilities: 0,
-      criticalCount: 0,
-      highCount: 0,
-      mediumCount: 0,
-      lowCount: 0,
-      infoCount: 0,
-    };
+  const handleImageCapture = async (file: File, previewUrl: string) => {
+    setIsAnalyzing(true);
+    
+    try {
+      // Analyze image
+      const matches = await analyzeImage(file);
+      
+      // Create search result
+      const searchResult: SearchResult = {
+        id: `search-${Date.now()}`,
+        timestamp: Date.now(),
+        imageUrl: previewUrl,
+        imageFile: file,
+        matches,
+        searchDuration: 2000,
+        status: 'completed'
+      };
 
-    scans.forEach((scan) => {
-      scan.vulnerabilities.forEach((vuln) => {
-        stats.totalVulnerabilities++;
-        switch (vuln.severity) {
-          case "critical":
-            stats.criticalCount++;
-            break;
-          case "high":
-            stats.highCount++;
-            break;
-          case "medium":
-            stats.mediumCount++;
-            break;
-          case "low":
-            stats.lowCount++;
-            break;
-          case "info":
-            stats.infoCount++;
-            break;
-        }
+      setCurrentSearch(searchResult);
+      
+      // Save to history
+      saveSearchHistory({
+        id: searchResult.id,
+        timestamp: searchResult.timestamp,
+        imageUrl: previewUrl,
+        resultCount: matches.length,
+        topMatch: matches[0]?.product
       });
-    });
 
-    setStatistics(stats);
+      saveSearchResult(searchResult);
+      
+      // Switch to results tab
+      setActiveTab('results');
+      updateStats();
+    } catch (error) {
+      console.error('Error analyzing image:', error);
+      alert('Failed to analyze image. Please try again.');
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
-  const startScan = (url: string, profile: ScanProfile) => {
-    const newScan: ScanResult = {
-      id: Date.now().toString(),
-      url,
-      status: "scanning",
-      vulnerabilities: [],
-      startTime: new Date(),
-      progress: 0,
-      pagesScanned: 0,
-      totalPages: profile.depth * 10,
-      scanProfile: profile,
-    };
+  const handleHistoryImageClick = async (imageUrl: string) => {
+    setActiveTab('search');
+    setIsAnalyzing(true);
+    
+    try {
+      const matches = await analyzeImage(imageUrl);
+      
+      const searchResult: SearchResult = {
+        id: `search-${Date.now()}`,
+        timestamp: Date.now(),
+        imageUrl,
+        matches,
+        searchDuration: 2000,
+        status: 'completed'
+      };
 
-    setScans([newScan, ...scans]);
-    setActiveTab("results");
-
-    // Simulate scanning progress
-    const progressInterval = setInterval(() => {
-      setScans((prevScans) => {
-        const scan = prevScans.find((s) => s.id === newScan.id);
-        if (!scan || scan.status !== "scanning") {
-          clearInterval(progressInterval);
-          return prevScans;
-        }
-
-        const newProgress = Math.min(scan.progress + Math.random() * 15, 100);
-        const newPagesScanned = Math.floor((newProgress / 100) * scan.totalPages);
-
-        return prevScans.map((s) =>
-          s.id === newScan.id
-            ? { ...s, progress: newProgress, pagesScanned: newPagesScanned }
-            : s
-        );
+      setCurrentSearch(searchResult);
+      
+      saveSearchHistory({
+        id: searchResult.id,
+        timestamp: searchResult.timestamp,
+        imageUrl,
+        resultCount: matches.length,
+        topMatch: matches[0]?.product
       });
-    }, 500);
 
-    // Complete scan after timeout
-    setTimeout(() => {
-      clearInterval(progressInterval);
-      const vulnerabilities = generateVulnerabilities(url, profile);
-
-      setScans((prevScans) =>
-        prevScans.map((scan) =>
-          scan.id === newScan.id
-            ? {
-                ...scan,
-                status: "completed",
-                vulnerabilities,
-                endTime: new Date(),
-                progress: 100,
-                pagesScanned: scan.totalPages,
-              }
-            : scan
-        )
-      );
-    }, profile.timeout * 100);
-  };
-
-  const pauseScan = (scanId: string) => {
-    setScans((prevScans) =>
-      prevScans.map((scan) =>
-        scan.id === scanId && scan.status === "scanning"
-          ? { ...scan, status: "paused" }
-          : scan
-      )
-    );
-  };
-
-  const resumeScan = (scanId: string) => {
-    setScans((prevScans) =>
-      prevScans.map((scan) =>
-        scan.id === scanId && scan.status === "paused"
-          ? { ...scan, status: "scanning" }
-          : scan
-      )
-    );
-  };
-
-  const stopScan = (scanId: string) => {
-    setScans((prevScans) =>
-      prevScans.map((scan) =>
-        scan.id === scanId
-          ? { ...scan, status: "failed", endTime: new Date() }
-          : scan
-      )
-    );
-  };
-
-  const deleteScan = (scanId: string) => {
-    setScans((prevScans) => prevScans.filter((scan) => scan.id !== scanId));
-  };
-
-  const exportScan = (scanId: string, format: "json" | "csv" | "pdf") => {
-    const scan = scans.find((s) => s.id === scanId);
-    if (!scan) return;
-
-    if (format === "json") {
-      const dataStr = JSON.stringify(scan, null, 2);
-      const dataBlob = new Blob([dataStr], { type: "application/json" });
-      const url = URL.createObjectURL(dataBlob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `scan-${scan.id}.json`;
-      link.click();
-    } else if (format === "csv") {
-      const headers = ["Type", "Severity", "Title", "URL", "CWE", "CVSS"];
-      const rows = scan.vulnerabilities.map((v) => [
-        v.type,
-        v.severity,
-        v.title,
-        v.url,
-        v.cwe || "",
-        v.cvss?.toString() || "",
-      ]);
-      const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
-      const dataBlob = new Blob([csv], { type: "text/csv" });
-      const url = URL.createObjectURL(dataBlob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `scan-${scan.id}.csv`;
-      link.click();
-    } else if (format === "pdf") {
-      alert("PDF export would require a PDF generation library. JSON and CSV exports are available.");
+      saveSearchResult(searchResult);
+      setActiveTab('results');
+      updateStats();
+    } catch (error) {
+      console.error('Error analyzing image:', error);
+    } finally {
+      setIsAnalyzing(false);
     }
   };
-
-  const clearAllScans = () => {
-    if (confirm("Are you sure you want to delete all scan history?")) {
-      setScans([]);
-      localStorage.removeItem("vulnscanner_scans");
-    }
-  };
-
-  const activeScan = scans.find((s) => s.status === "scanning" || s.status === "paused");
-  const completedScans = scans.filter((s) => s.status === "completed" || s.status === "failed");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Header */}
-      <header className="bg-black/30 backdrop-blur-sm border-b border-purple-500/20 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-6">
+      <header className="sticky top-0 z-40 bg-gray-900/80 backdrop-blur-md border-b border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">V</span>
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                <span className="text-2xl">📸</span>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">VulnScanner Pro</h1>
-                <p className="text-sm text-purple-300">Advanced Web Vulnerability Scanner</p>
+                <h1 className="text-2xl font-bold text-white">ShopSnap</h1>
+                <p className="text-xs text-gray-400">Visual Product Search</p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right hidden md:block">
-                <div className="text-sm text-purple-300">Total Scans</div>
-                <div className="text-xl font-bold text-white">{statistics.totalScans}</div>
+
+            {/* Stats */}
+            <div className="hidden md:flex items-center gap-6">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-white">{stats.totalSearches}</div>
+                <div className="text-xs text-gray-400">Searches</div>
               </div>
-              <div className="text-right hidden md:block">
-                <div className="text-sm text-purple-300">Vulnerabilities</div>
-                <div className="text-xl font-bold text-white">
-                  {statistics.totalVulnerabilities}
-                </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-white">{stats.totalProductsFound}</div>
+                <div className="text-xs text-gray-400">Products</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-white">{stats.totalWishlistItems}</div>
+                <div className="text-xs text-gray-400">Wishlist</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-400">${stats.totalSavings.toFixed(0)}</div>
+                <div className="text-xs text-gray-400">Saved</div>
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        {/* Navigation Tabs */}
-        <div className="flex space-x-2 mb-6">
-          <button
-            onClick={() => setActiveTab("scanner")}
-            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
-              activeTab === "scanner"
-                ? "bg-purple-600 text-white shadow-lg shadow-purple-500/50"
-                : "bg-white/10 text-purple-300 hover:bg-white/20"
-            }`}
-          >
-            Scanner
-          </button>
-          <button
-            onClick={() => setActiveTab("results")}
-            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
-              activeTab === "results"
-                ? "bg-purple-600 text-white shadow-lg shadow-purple-500/50"
-                : "bg-white/10 text-purple-300 hover:bg-white/20"
-            }`}
-          >
-            Results ({scans.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("dashboard")}
-            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
-              activeTab === "dashboard"
-                ? "bg-purple-600 text-white shadow-lg shadow-purple-500/50"
-                : "bg-white/10 text-purple-300 hover:bg-white/20"
-            }`}
-          >
-            Dashboard
-          </button>
+      {/* Navigation Tabs */}
+      <nav className="sticky top-[73px] z-30 bg-gray-900/80 backdrop-blur-md border-b border-gray-800">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex gap-1">
+            {[
+              { id: 'search', label: 'Search', icon: '🔍' },
+              { id: 'results', label: 'Results', icon: '📊', badge: currentSearch?.matches.length },
+              { id: 'wishlist', label: 'Wishlist', icon: '💝', badge: stats.totalWishlistItems },
+              { id: 'history', label: 'History', icon: '🕐', badge: stats.totalSearches }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as TabType)}
+                className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all relative ${
+                  activeTab === tab.id
+                    ? 'text-white'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                <span className="text-xl">{tab.icon}</span>
+                <span>{tab.label}</span>
+                {tab.badge !== undefined && tab.badge > 0 && (
+                  <span className="absolute -top-1 -right-1 w-6 h-6 bg-purple-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                    {tab.badge > 99 ? '99+' : tab.badge}
+                  </span>
+                )}
+                {activeTab === tab.id && (
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-t-full"></div>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
+      </nav>
 
-        {/* Scanner Tab */}
-        {activeTab === "scanner" && (
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-purple-500/20">
-            <h2 className="text-3xl font-bold text-white mb-6">Start New Scan</h2>
-            <ScannerForm onStartScan={startScan} />
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        {/* Search Tab */}
+        {activeTab === 'search' && (
+          <div className="animate-fadeIn">
+            <CameraCapture onImageCapture={handleImageCapture} isAnalyzing={isAnalyzing} />
           </div>
         )}
 
         {/* Results Tab */}
-        {activeTab === "results" && (
-          <div className="space-y-6">
-            {activeScan && (
-              <ScanProgress
-                scan={activeScan}
-                onPause={() => pauseScan(activeScan.id)}
-                onResume={() => resumeScan(activeScan.id)}
-                onStop={() => stopScan(activeScan.id)}
-              />
-            )}
+        {activeTab === 'results' && (
+          <div className="animate-fadeIn">
+            {currentSearch && currentSearch.matches.length > 0 ? (
+              <div>
+                {/* Search Info */}
+                <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 mb-6 border border-gray-700">
+                  <div className="flex items-center gap-6">
+                    {/* Image Preview */}
+                    <div className="w-24 h-24 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                      {currentSearch.imageUrl.startsWith('data:') || currentSearch.imageUrl.startsWith('blob:') ? (
+                        <img
+                          src={currentSearch.imageUrl}
+                          alt="Search"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-4xl">📷</span>
+                      )}
+                    </div>
 
-            {completedScans.length === 0 && !activeScan && (
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-purple-500/20 text-center">
-                <p className="text-purple-300 text-lg">
-                  No scans yet. Start your first scan!
-                </p>
-              </div>
-            )}
+                    {/* Info */}
+                    <div className="flex-1">
+                      <h2 className="text-2xl font-bold text-white mb-2">
+                        Found {currentSearch.matches.length} Matching Products
+                      </h2>
+                      <p className="text-gray-400">
+                        Searched on {new Date(currentSearch.timestamp).toLocaleString()}
+                      </p>
+                    </div>
 
-            {completedScans.length > 0 && (
-              <>
-                <div className="flex justify-between items-center">
-                  <h3 className="text-2xl font-bold text-white">Scan History</h3>
-                  <button
-                    onClick={clearAllScans}
-                    className="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition-all"
-                  >
-                    Clear All
-                  </button>
+                    {/* New Search Button */}
+                    <button
+                      onClick={() => setActiveTab('search')}
+                      className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
+                    >
+                      New Search
+                    </button>
+                  </div>
                 </div>
-                {completedScans.map((scan) => (
-                  <ScanResults
-                    key={scan.id}
-                    scan={scan}
-                    onExport={(format) => exportScan(scan.id, format)}
-                    onDelete={() => deleteScan(scan.id)}
-                  />
-                ))}
-              </>
+
+                {/* Results Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {currentSearch.matches.map((match) => (
+                    <ProductCard
+                      key={match.product.id}
+                      match={match}
+                      onClick={() => setSelectedProduct(match.product)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-20">
+                <div className="text-6xl mb-4">🔍</div>
+                <h3 className="text-2xl font-bold text-white mb-2">No Results Yet</h3>
+                <p className="text-gray-400 text-center max-w-md mb-6">
+                  Upload an image to start searching for products
+                </p>
+                <button
+                  onClick={() => setActiveTab('search')}
+                  className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
+                >
+                  Start Searching
+                </button>
+              </div>
             )}
           </div>
         )}
 
-        {/* Dashboard Tab */}
-        {activeTab === "dashboard" && (
-          <div>
-            <h2 className="text-3xl font-bold text-white mb-6">Security Dashboard</h2>
-            <Dashboard statistics={statistics} />
+        {/* Wishlist Tab */}
+        {activeTab === 'wishlist' && (
+          <div className="animate-fadeIn">
+            <Wishlist onProductClick={setSelectedProduct} />
+          </div>
+        )}
 
-            {scans.length === 0 && (
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-purple-500/20 text-center">
-                <p className="text-purple-300 text-lg">
-                  No data available. Run some scans to see statistics.
-                </p>
-              </div>
-            )}
+        {/* History Tab */}
+        {activeTab === 'history' && (
+          <div className="animate-fadeIn">
+            <SearchHistory onImageClick={handleHistoryImageClick} />
           </div>
         )}
       </main>
 
+      {/* Product Details Modal */}
+      {selectedProduct && (
+        <ProductDetails product={selectedProduct} onClose={() => setSelectedProduct(null)} />
+      )}
+
       {/* Footer */}
-      <footer className="bg-black/30 backdrop-blur-sm border-t border-purple-500/20 mt-12">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex justify-between items-center flex-wrap gap-4">
-            <p className="text-purple-300 text-sm">
-              VulnScanner Pro - Advanced Web Vulnerability Scanner © 2026
-            </p>
-            <div className="flex space-x-4 text-sm text-purple-400">
-              <span>Version 1.0.0</span>
-              <span>•</span>
-              <span>{scans.length} Total Scans</span>
-              <span>•</span>
-              <span>{statistics.totalVulnerabilities} Vulnerabilities Found</span>
+      <footer className="mt-20 border-t border-gray-800 bg-gray-900/50 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                <span className="text-xl">📸</span>
+              </div>
+              <div>
+                <div className="font-bold text-white">ShopSnap</div>
+                <div className="text-xs text-gray-400">Visual Product Search & Price Comparison</div>
+              </div>
+            </div>
+            <div className="text-sm text-gray-400">
+              © 2026 ShopSnap. All rights reserved.
             </div>
           </div>
         </div>

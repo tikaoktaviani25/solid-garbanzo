@@ -1,218 +1,317 @@
-# VulnScanner Pro - Advanced Web Vulnerability Scanner
+# 📸 ShopSnap - Visual Product Search & Price Comparison
 
-A modern, robust, and feature-rich web vulnerability scanner built with Next.js, TypeScript, and Tailwind CSS. This is a professional browser-based alternative to Acunetix with advanced capabilities.
+**ShopSnap** is a cutting-edge web application that revolutionizes online shopping by allowing users to find products instantly by taking a photo. Using AI-powered visual recognition, ShopSnap identifies products, compares prices across multiple retailers, and helps users save money.
 
-## 🚀 New Features
+## 🌟 Why ShopSnap?
 
-### Core Scanning Features
-- **Multiple Scan Profiles**: Quick, Standard, Deep, and Custom scan configurations
-- **Real-time Progress Tracking**: Live progress bars with page count and percentage
-- **Scan Control**: Pause, Resume, and Stop scans mid-execution
-- **14 Vulnerability Types**: Comprehensive detection including:
-  - SQL Injection
-  - Cross-Site Scripting (XSS)
-  - CSRF
-  - Security Headers
-  - SSL/TLS Configuration
-  - Information Disclosure
-  - Directory Traversal
-  - Authentication Issues
-  - Authorization Issues
-  - File Upload Vulnerabilities
-  - Command Injection
-  - XXE (XML External Entity)
-  - SSRF (Server-Side Request Forgery)
-  - Broken Access Control
+ShopSnap addresses a real market need - **visual product search** is one of the most searched features that doesn't have a dedicated, comprehensive solution. While Google Lens and Pinterest Lens exist, they lack the shopping-focused features that users want:
 
-### Advanced Features
-- **Security Dashboard**: Real-time statistics and vulnerability distribution charts
-- **Persistent Storage**: Scan history saved in browser localStorage
-- **Export Capabilities**: Export scan results in JSON and CSV formats
-- **Severity Filtering**: Filter vulnerabilities by severity level
-- **Sorting Options**: Sort by severity or vulnerability type
-- **Detailed Vulnerability Cards**: Expandable cards with:
-  - CWE (Common Weakness Enumeration) codes
-  - CVSS (Common Vulnerability Scoring System) scores
-  - Evidence of exploitation
-  - Detailed recommendations
-  - Affected URLs
+- **Dedicated Shopping Experience**: Built specifically for product discovery and price comparison
+- **Multi-Store Price Comparison**: Compare prices across 10+ major retailers instantly
+- **Wishlist & Tracking**: Save products and track price changes
+- **Search History**: Keep track of all your searches
+- **Beautiful UI**: Modern, responsive design with smooth animations
 
-### User Experience
-- **Beautiful Modern UI**: Gradient design with glassmorphism effects
-- **Responsive Design**: Works perfectly on desktop, tablet, and mobile
-- **Dark Theme**: Eye-friendly dark color scheme
-- **Smooth Animations**: Professional transitions and loading states
-- **Intuitive Navigation**: Three-tab interface (Scanner, Results, Dashboard)
+## ✨ Key Features
 
-## 📊 Dashboard Features
+### 🔍 AI-Powered Visual Search
+- Upload or drag-and-drop product images
+- Advanced AI recognition with confidence scores
+- Instant product matching (1-3 seconds)
+- Support for multiple product categories
 
-- Total scans counter
-- Completed scans tracking
-- Total vulnerabilities found
-- Severity breakdown (Critical, High, Medium, Low, Info)
-- Visual distribution charts
-- Percentage calculations
+### 💰 Price Comparison
+- Compare prices across 10+ stores (Amazon, eBay, Walmart, Target, Best Buy, etc.)
+- Real-time availability status
+- Discount detection and savings calculation
+- Shipping cost information
+- Best price highlighting
 
-## 🎯 Scan Profiles
+### 💝 Wishlist Management
+- Save favorite products
+- Sort by price or date added
+- Quick access to product details
+- Total value calculation
+- One-click removal
 
-### Quick Scan
-- Fast scan for common vulnerabilities
-- 3 vulnerability checks
-- Depth: 1 level
-- Timeout: 30 seconds
+### 🕐 Search History
+- Automatic search tracking
+- Visual search history with thumbnails
+- Re-search from history
+- Clear individual or all searches
+- Top match preview
 
-### Standard Scan (Recommended)
-- Comprehensive scan with balanced speed and coverage
-- 7 vulnerability checks
-- Depth: 3 levels
-- Timeout: 60 seconds
+### 📊 Product Details
+- Comprehensive product information
+- Multiple high-quality images
+- Detailed specifications
+- Customer ratings and reviews
+- Brand and category information
+- Direct links to purchase
 
-### Deep Scan
-- Thorough scan covering all vulnerability types
-- 14 vulnerability checks
-- Depth: 5 levels
-- Timeout: 120 seconds
+### 📈 Statistics Dashboard
+- Total searches performed
+- Products found
+- Wishlist items
+- Total savings tracked
 
-### Custom Scan
-- Configure your own scan parameters
-- Adjustable depth (1-10 levels)
-- Adjustable timeout (10-300 seconds)
+## 🎯 Product Categories
+
+ShopSnap supports 50+ products across 9 categories:
+
+- **Fashion**: Shoes, clothing, accessories, bags
+- **Electronics**: Phones, laptops, tablets, smartwatches, TVs
+- **Home & Living**: Kitchen appliances, furniture, bedding
+- **Beauty**: Skincare, makeup, hair care
+- **Sports**: Fitness equipment, athletic wear, outdoor gear
+- **Accessories**: Watches, sunglasses, wallets, backpacks
+- **Furniture**: Office chairs, desks, sofas, tables
+- **Toys**: LEGO, RC cars, board games, drones
+- **Books**: Fiction, cookbooks, educational
 
 ## 🛠️ Technology Stack
 
 - **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript 5
+- **UI Library**: React 19
 - **Styling**: Tailwind CSS 3.4
-- **UI**: React 19
 - **State Management**: React Hooks
 - **Storage**: Browser localStorage
+- **Build Tool**: Turbopack
 
-## 📦 Installation
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+ installed
+- npm or yarn package manager
+
+### Installation
 
 ```bash
+# Clone the repository
+git clone <repository-url>
+cd shopsnap
+
 # Install dependencies
 npm install
 
 # Run development server
 npm run dev
 
-# Build for production
+# Open browser
+# Navigate to http://localhost:3000
+```
+
+### Build for Production
+
+```bash
+# Create production build
 npm run build
 
 # Start production server
 npm start
 ```
 
-## 🌐 Usage
+### Linting
 
-1. **Start a Scan**
-   - Navigate to the Scanner tab
-   - Enter target URL (e.g., https://example.com)
-   - Select a scan profile
-   - Optionally adjust advanced settings
-   - Click "Start Scan"
+```bash
+# Run ESLint
+npm run lint
+```
 
-2. **Monitor Progress**
-   - Switch to Results tab to see real-time progress
-   - View pages scanned and percentage complete
-   - Pause, resume, or stop scan as needed
+## 📖 How to Use
 
-3. **Review Results**
-   - View vulnerability summary by severity
-   - Filter and sort vulnerabilities
-   - Expand cards for detailed information
-   - Export results in JSON or CSV format
+### 1. Search for Products
 
-4. **Analyze Dashboard**
-   - View overall security statistics
-   - Track vulnerability trends
-   - Monitor scan history
+1. Navigate to the **Search** tab
+2. Click "Choose Image" or drag-and-drop a product image
+3. Wait 1-3 seconds for AI analysis
+4. View matching products with confidence scores
+
+### 2. Compare Prices
+
+1. Click on any product card to view details
+2. See prices from all available stores
+3. Compare shipping costs and delivery times
+4. Click "View at [Store]" to purchase
+
+### 3. Manage Wishlist
+
+1. Click the heart icon on any product
+2. Navigate to **Wishlist** tab
+3. Sort by price or date added
+4. Remove items or view details
+
+### 4. View History
+
+1. Navigate to **History** tab
+2. See all past searches with thumbnails
+3. Click "Search Again" to re-run analysis
+4. Delete individual searches or clear all
+
+## 🎨 Design Features
+
+### Visual Design
+- **Gradient Backgrounds**: Purple to pink gradients throughout
+- **Glassmorphism**: Frosted glass effects on cards
+- **Dark Theme**: Eye-friendly dark color scheme
+- **Smooth Animations**: Fade-in, slide-up, scale effects
+- **Responsive Layout**: Works on mobile, tablet, and desktop
+
+### User Experience
+- **Intuitive Navigation**: Tab-based interface
+- **Real-time Feedback**: Loading states and progress indicators
+- **Empty States**: Helpful messages when no data
+- **Hover Effects**: Interactive elements respond to mouse
+- **Keyboard Accessible**: Full keyboard navigation support
 
 ## 📁 Project Structure
 
 ```
-vuln-scanner/
+shopsnap/
 ├── app/
-│   ├── globals.css          # Global styles with animations
-│   ├── layout.tsx           # Root layout
+│   ├── globals.css          # Global styles and animations
+│   ├── layout.tsx           # Root layout with metadata
 │   └── page.tsx             # Main application page
 ├── components/
-│   ├── Dashboard.tsx        # Statistics dashboard
-│   ├── ScannerForm.tsx      # Scan configuration form
-│   ├── ScanProgress.tsx     # Real-time scan progress
-│   ├── ScanResults.tsx      # Scan results display
-│   └── VulnerabilityCard.tsx # Individual vulnerability card
+│   ├── CameraCapture.tsx    # Image upload interface
+│   ├── ProductCard.tsx      # Product display card
+│   ├── ProductDetails.tsx   # Detailed product modal
+│   ├── Wishlist.tsx         # Wishlist management
+│   └── SearchHistory.tsx    # Search history display
 ├── lib/
-│   ├── mockScanner.ts       # Vulnerability generation engine
-│   └── scanProfiles.ts      # Scan profile configurations
+│   ├── imageAnalysis.ts     # AI image recognition (mock)
+│   ├── productDatabase.ts   # Product data (50+ products)
+│   ├── stores.ts            # Store information (10 stores)
+│   └── storage.ts           # localStorage utilities
 ├── types/
 │   └── index.ts             # TypeScript type definitions
-├── package.json             # Dependencies
+├── package.json             # Dependencies and scripts
 ├── tsconfig.json            # TypeScript configuration
 ├── tailwind.config.ts       # Tailwind CSS configuration
 └── next.config.ts           # Next.js configuration
 ```
 
-## 🔒 Security Features
+## 🔧 Configuration
 
-- **CWE Mapping**: Each vulnerability mapped to CWE standards
-- **CVSS Scoring**: Vulnerabilities rated with CVSS scores
-- **Evidence Collection**: Proof of vulnerability exploitation
-- **Remediation Guidance**: Detailed fix recommendations
-- **Severity Classification**: 5-level severity system
+### Tailwind CSS
 
-## 🎨 UI/UX Features
+The app uses a custom Tailwind configuration with:
+- Extended color palette (purple, pink gradients)
+- Custom animations (fadeIn, slideUp, scaleIn)
+- Responsive breakpoints
+- Custom utilities
 
-- Gradient backgrounds (slate-900 → purple-900)
-- Glassmorphism effects with backdrop blur
-- Smooth transitions and animations
-- Color-coded severity indicators
-- Responsive grid layouts
-- Sticky header navigation
-- Loading states and spinners
-- Empty state messages
+### TypeScript
 
-## 📊 Export Formats
+Strict mode enabled with:
+- Type checking for all files
+- Path aliases (@/components, @/lib, @/types)
+- Incremental compilation
+- ES2022 target
 
-### JSON Export
-Complete scan data including:
-- Scan metadata
-- All vulnerabilities
-- Timestamps
-- Scan profile used
+## 🎯 Mock Data
 
-### CSV Export
-Spreadsheet-compatible format with:
-- Vulnerability type
-- Severity level
-- Title and URL
-- CWE and CVSS scores
+### Products
+- 50 realistic products across 9 categories
+- Detailed attributes (color, size, material, weight)
+- Multiple images per product
+- Ratings and review counts
+- Tags for search optimization
 
-## 🔄 Future Enhancements
+### Stores
+- 10 major retailers
+- Trust scores and ratings
+- Shipping policies
+- Return policies
+- Store logos (emoji-based)
 
-- Real vulnerability scanning engine
-- API integration for backend scanning
-- PDF report generation
-- Scheduled scans
-- User authentication
-- Team collaboration
-- Custom scan profiles
-- CI/CD pipeline integration
-- Webhook notifications
-- Compliance reporting (OWASP, PCI-DSS)
+### Prices
+- Dynamic price generation (±15% variation)
+- Discount detection (20-40% off)
+- Availability status (In Stock, Limited, Out of Stock)
+- Shipping costs (free or calculated)
+- Estimated delivery times
 
-## 📝 License
+## 🔮 Future Enhancements
 
-MIT License
+### Phase 1: Real AI Integration
+- [ ] Integrate real computer vision API (Google Vision, AWS Rekognition)
+- [ ] Implement actual product database
+- [ ] Connect to real store APIs
+- [ ] Real-time price updates
+
+### Phase 2: Advanced Features
+- [ ] Price drop alerts via email/push notifications
+- [ ] Barcode scanning
+- [ ] AR try-on for fashion items
+- [ ] Similar products recommendations
+- [ ] User accounts and cloud sync
+
+### Phase 3: Social & Sharing
+- [ ] Share products with friends
+- [ ] Social login (Google, Facebook)
+- [ ] Product reviews and ratings
+- [ ] Community wishlists
+- [ ] Shopping groups
+
+### Phase 4: Mobile Apps
+- [ ] React Native mobile app
+- [ ] Camera integration
+- [ ] Push notifications
+- [ ] Offline mode
+- [ ] Location-based deals
+
+### Phase 5: Business Features
+- [ ] Affiliate program integration
+- [ ] Sponsored products
+- [ ] Analytics dashboard
+- [ ] API for third-party integration
+- [ ] White-label solution
+
+## 🐛 Known Limitations
+
+- **Mock AI**: Currently uses simulated AI recognition
+- **Static Data**: Product database is hardcoded
+- **No Backend**: All data stored in browser localStorage
+- **No Real Prices**: Prices are generated, not real-time
+- **Limited Products**: Only 50 products in database
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please follow these steps:
 
-## 📧 Support
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-For issues and questions, please open an issue on the repository.
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team for the amazing framework
+- Tailwind CSS for the utility-first CSS framework
+- React team for the UI library
+- All open-source contributors
+
+## 📧 Contact & Support
+
+For questions, issues, or feature requests:
+- Open an issue on GitHub
+- Email: support@shopsnap.com (placeholder)
+- Twitter: @ShopSnapApp (placeholder)
+
+## 🌐 Live Demo
+
+Visit the live demo at: [https://shopsnap.vercel.app](https://shopsnap.vercel.app) (placeholder)
 
 ---
 
-**VulnScanner Pro** - Professional Web Security Testing Made Easy
+**ShopSnap** - Find it. Compare it. Buy it. 📸✨
+
+Built with ❤️ using Next.js, React, and TypeScript
